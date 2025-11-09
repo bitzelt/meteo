@@ -1,0 +1,248 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Clima — Mar del Plata</title>
+<style>
+  :root{--bg:#0f1116;--card:#14171b;--muted:#98a1ad;--accent:#6ea8ff}
+  html,body{height:100%;margin:0;font-family:Inter,system-ui,Arial,sans-serif;background:var(--bg);color:#eef2f7}
+  .wrap{max-width:1100px;margin:18px auto;padding:12px}
+  header{display:flex;justify-content:space-between;align-items:center;gap:12px}
+  header h1{margin:0;color:var(--accent);font-size:1.05rem}
+  .layout{display:grid;grid-template-columns:1fr;gap:16px;margin-top:16px}
+  @media(min-width:920px){.layout{grid-template-columns:1fr 420px}}
+  .card{background:var(--card);border-radius:12px;padding:14px;box-shadow:0 6px 22px rgba(0,0,0,0.5)}
+  .controls{display:flex;gap:8px;align-items:center}
+  select,input,button{background:transparent;border:1px solid rgba(255,255,255,0.06);color:#fff;padding:8px 10px;border-radius:8px}
+  button{background:var(--accent);color:#042039;border:none;cursor:pointer}
+  .row{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+  .icon-large{width:96px;height:96px}
+  .temp{font-size:2.4rem;font-weight:700}
+  .desc{color:var(--muted);text-transform:capitalize}
+  .meta{font-size:0.9rem;color:var(--muted);margin-top:8px}
+  .forecast{display:flex;gap:10px;margin-top:12px;flex-wrap:wrap}
+  .fday{background:rgba(255,255,255,0.02);padding:8px;border-radius:8px;width:110px;text-align:center}
+  iframe{width:100%;height:320px;border:0;border-radius:8px}
+  .small{font-size:0.85rem;color:var(--muted)}
+  .grid-2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  footer{margin-top:14px;color:var(--muted);font-size:0.85rem;text-align:center}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div>
+      <h1>Clima — Mar del Plata</h1>
+      <div class="small">Datos actuales, humedad, presión, viento, radar y satélite</div>
+    </div>
+    <div class="controls">
+      <button id="btnRefresh">Actualizar</button>
+      <a href="https://www.smn.gob.ar" target="_blank" style="text-decoration:none"><button>Ver SMN (oficial)</button></a>
+    </div>
+  </header>
+
+  <div class="layout">
+    <!-- IZQUIERDA: CLIMA -->
+    <main class="card" id="mainCard">
+      <section id="current" aria-live="polite">
+        <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap">
+          <div>
+            <div id="cityName" style="font-weight:700;font-size:1.2rem">Mar del Plata, AR</div>
+            <div id="timeStamp" class="small">Última actualización: --</div>
+          </div>
+          <div class="row">
+            <img id="weatherIcon" class="icon-large" src="" alt="">
+            <div style="text-align:right">
+              <div class="temp" id="tempVal">--°C</div>
+              <div class="desc" id="descVal">--</div>
+              <div class="meta" id="metaVal">Hum: -- · Pres: -- hPa · Viento: -- m/s</div>
+            </div>
+          </div>
+        </div>
+        <div style="margin-top:12px">
+          <strong>Detalles</strong>
+          <div class="grid-2" style="margin-top:8px">
+            <div class="small card" style="padding:10px">Sensación térmica: <span id="feels">--°C</span></div>
+            <div class="small card" style="padding:10px">Visibilidad: <span id="vis">-- km</span></div>
+            <div class="small card" style="padding:10px">Prob. lluvia (3h): <span id="pop">-- %</span></div>
+            <div class="small card" style="padding:10px">Nubosidad: <span id="clouds">-- %</span></div>
+          </div>
+        </div>
+        <div class="forecast" id="forecast"></div>
+      </section>
+    </main>
+
+    <!-- DERECHA: RADAR + MAPA TEMP + SAT -->
+    <aside>
+      <div class="card" style="margin-bottom:12px">
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <div><strong>Radar (RainViewer)</strong><div class="small">centrado en Mar del Plata</div></div>
+          <div class="small">Actualiza 5 min</div>
+        </div>
+        <div style="margin-top:10px">
+          <iframe id="radarFrame"
+            src="https://www.rainviewer.com/map.html?lat=-38.00&lon=-57.55&zoom=8&overlay=radar&opacity=80&animate=true"
+            title="Radar Mar del Plata"></iframe>
+        </div>
+      </div>
+
+      <div class="card" style="margin-bottom:12px">
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <div><strong>Mapa de temperatura (Windy)</strong><div class="small">capa temperatura, centrado</div></div>
+          <div class="small">Interactivo</div>
+        </div>
+        <div style="margin-top:10px">
+          <iframe
+            src="https://embed.windy.com/embed2.html?lat=-38.00&lon=-57.55&zoom=8&level=surface&overlay=temperature&menu=&marker=true"
+            title="Mapa Temperatura"></iframe>
+        </div>
+      </div>
+
+      <div class="card">
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <div><strong>Satélite (Zoom Earth)</strong><div class="small">Vista satélite interactiva</div></div>
+          <div class="small">Actualiza automáticamente</div>
+        </div>
+        <div style="margin-top:10px">
+          <iframe 
+            src="https://zoom.earth/embed/#lat=-38.00;lon=-57.55;z=7;type=satellite" 
+            width="100%" height="320" style="border:0; border-radius:8px;"></iframe>
+        </div>
+      </div>
+    </aside>
+  </div>
+
+  <footer>
+    Página final — API: OpenWeatherMap (usa tu clave). Radar: RainViewer. Satélite: Zoom Earth.
+  </footer>
+</div>
+
+<script>
+// ======================
+// CONFIG: Pega tu API KEY aquí
+// ======================
+const API_KEY = "ed3ff78da52f4d08960210312250911"; // <-- AQUÍ TU API KEY
+
+// Coordenadas Mar del Plata
+const LAT = -38.0055;
+const LON = -57.5426;
+
+// DOM refs
+const cityNameEl = document.getElementById('cityName');
+const timeStampEl = document.getElementById('timeStamp');
+const tempValEl = document.getElementById('tempVal');
+const descValEl = document.getElementById('descVal');
+const metaValEl = document.getElementById('metaVal');
+const iconEl = document.getElementById('weatherIcon');
+const forecastEl = document.getElementById('forecast');
+const feelsEl = document.getElementById('feels');
+const visEl = document.getElementById('vis');
+const popEl = document.getElementById('pop');
+const cloudsEl = document.getElementById('clouds');
+const radarFrame = document.getElementById('radarFrame');
+const btnRefresh = document.getElementById('btnRefresh');
+
+// --- FETCH datos actuales y forecast (lat/lon) ---
+async function fetchClimaLatLon(lat, lon){
+  const urlNow = `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${API_KEY}&units=metric&lang=es`;
+  const urlForecast = `https://api.openweathermap.org/data/2.5/forecast?lat=${lat}&lon=${lon}&appid=${API_KEY}&units=metric&lang=es`;
+  const [rNow, rF] = await Promise.all([fetch(urlNow), fetch(urlForecast)]);
+  const now = await rNow.json();
+  const forecast = await rF.json();
+  return { now, forecast };
+}
+
+// --- Render actual ---
+function renderNow(now){
+  cityNameEl.innerText = now.name + (now.sys && now.sys.country ? `, ${now.sys.country}` : '');
+  timeStampEl.innerText = 'Última actualización: ' + new Date().toLocaleString();
+  tempValEl.innerText = Math.round(now.main.temp) + '°C';
+  descValEl.innerText = now.weather[0].description;
+  metaValEl.innerText = `Hum: ${now.main.humidity}% · Pres: ${now.main.pressure} hPa · Viento: ${now.wind.speed} m/s`;
+  feelsEl.innerText = Math.round(now.main.feels_like) + '°C';
+  visEl.innerText = (now.visibility/1000).toFixed(1) + ' km';
+  cloudsEl.innerText = now.clouds ? now.clouds.all + ' %' : '--';
+  popEl.innerText = '--';
+  iconEl.src = `https://openweathermap.org/img/wn/${now.weather[0].icon}@4x.png`;
+  iconEl.alt = now.weather[0].description;
+}
+
+// --- Pronóstico 7 días ---
+function summarizeForecast(forecastData){
+  const map = {};
+  forecastData.list.forEach(item=>{
+    const d = new Date(item.dt*1000);
+    const day = d.toLocaleDateString('es-AR', {weekday:'long'});
+    if (!map[day]) map[day] = [];
+    map[day].push(item);
+  });
+  const days = Object.keys(map);
+  const result = days.map(day=>{
+    const arr = map[day];
+    let min=Infinity,max=-Infinity;
+    const icons = {};
+    arr.forEach(it=>{
+      const t = it.main.temp;
+      if (t<min) min=t;
+      if (t>max) max=t;
+      const ico=it.weather[0].icon; icons[ico]=(icons[ico]||0)+1;
+    });
+    const topIcon = Object.keys(icons).reduce((a,b)=> icons[a]>icons[b]?a:b);
+    return { day, min: Math.round(min), max: Math.round(max), icon: topIcon };
+  });
+  return result;
+}
+function renderForecast(summary){
+  forecastEl.innerHTML = '';
+  if (!summary || !summary.length){ forecastEl.innerHTML = '<div class="small">Pronóstico no disponible</div>'; return; }
+  summary.forEach(s=>{
+    const d = document.createElement('div'); d.className='fday';
+    d.innerHTML = `<div style="font-weight:700;text-transform:capitalize">${s.day}</div>
+                   <div style="margin-top:6px"><img src="https://openweathermap.org/img/wn/${s.icon}.png" alt=""></div>
+                   <div style="margin-top:6px">${s.max}° / ${s.min}°</div>`;
+    forecastEl.appendChild(d);
+  });
+}
+
+// --- REFRESH RADAR ---
+function refreshRadar(){ 
+  const url='https://www.rainviewer.com/map.html?lat=-38.00&lon=-57.55&zoom=8&overlay=radar&opacity=80&animate=true'; 
+  radarFrame.src = url + '&t=' + Date.now(); 
+}
+
+// --- MAIN ---
+async function actualizar(){
+  try{
+    cityNameEl.innerText = 'Cargando...';
+    tempValEl.innerText = '--°C';
+    descValEl.innerText = '--';
+    metaValEl.innerText = '';
+    iconEl.src = '';
+    forecastEl.innerHTML = '';
+    const data = await fetchClimaLatLon(LAT,LON);
+    renderNow(data.now);
+    const summary = summarizeForecast(data.forecast);
+    renderForecast(summary);
+    refreshRadar();
+  } catch(err){
+    console.error('Error al actualizar:', err);
+    cityNameEl.innerText = 'Mar del Plata (sin datos)';
+    tempValEl.innerText = '--°C';
+    descValEl.innerText = 'No disponible';
+    forecastEl.innerHTML = '<div class="small">Error al obtener datos</div>';
+  }
+}
+
+// events
+btnRefresh.addEventListener('click', () => actualizar());
+
+// init
+(function init(){
+  actualizar();
+  setInterval(actualizar, 10*60*1000); // clima cada 10 min
+  setInterval(refreshRadar, 5*60*1000); // radar 5 min
+})();
+</script>
+</body>
+</html>
