@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Clima - Mar del Plata y Región</title>
+<style>
+  body {
+    margin: 0;
+    font-family: sans-serif;
+    background-color: #0e1116;
+    color: #f0f0f0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  header {
+    width: 100%;
+    text-align: center;
+    padding: 1rem;
+    background-color: #181c24;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.4);
+  }
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 1rem;
+    width: 90%;
+    max-width: 1200px;
+    margin: 2rem auto;
+  }
+  .card {
+    background-color: #1a1f2b;
+    border-radius: 12px;
+    padding: 1.5rem;
+    text-align: center;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.5);
+  }
+  iframe {
+    border: none;
+    border-radius: 12px;
+    width: 100%;
+    height: 300px;
+  }
+  select {
+    background-color: #181c24;
+    color: #f0f0f0;
+    border: 1px solid #333;
+    padding: 0.5rem;
+    border-radius: 8px;
+  }
+  footer {
+    margin: 2rem;
+    opacity: 0.6;
+  }
+  @media(max-width:600px){
+    iframe{height:200px;}
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Clima - Región Mar del Plata</h1>
+  <p>Información meteorológica en tiempo real</p>
+</header>
+
+<!-- Selector de ciudad -->
+<section class="card">
+  <h2>Seleccionar ciudad</h2>
+  <select id="ciudadSelect">
+    <option value="Mar del Plata">Mar del Plata</option>
+    <option value="Miramar">Miramar</option>
+  </select>
+</section>
+
+<!-- Datos meteorológicos -->
+<section class="grid">
+  <div class="card" id="climaCiudad">
+    <h3>Ciudad</h3>
+    <p>Temperatura: <strong>-</strong></p>
+    <p>Estado: <strong>-</strong></p>
+    <img src="" alt="Icono clima" id="iconoClima">
+  </div>
+</section>
+
+<!-- Mapas -->
+<section class="grid">
+  <div class="card">
+    <h3>Mapa Windy</h3>
+    <iframe src="https://embed.windy.com/embed2.html?lat=-38.00&lon=-57.55&zoom=7&level=surface&overlay=wind&menu=&message=true&marker=&calendar=now&pressure=&type=map&location=coordinates"></iframe>
+  </div>
+  <div class="card">
+    <h3>Radar RainViewer</h3>
+    <iframe src="https://www.rainviewer.com/map.html?lat=-38&lon=-57&zoom=7&overlay=radar&opacity=80&animate=true"></iframe>
+  </div>
+</section>
+
+<footer>
+  <p>Versión HTML + CSS simple con API de clima y radar funcional</p>
+</footer>
+
+<script>
+// === CONFIGURACIÓN DE API ===
+// Clave personal de OpenWeatherMap:
+const API_KEY = "c375cc86cb6a691743a29b07cd2d7307"; // <-- ESTA ES TU API KEY
+
+// === FUNCIÓN PRINCIPAL DE ACTUALIZACIÓN ===
+function actualizarClima(ciudad){
+  fetch(`https://api.openweathermap.org/data/2.5/weather?q=${ciudad}&appid=${API_KEY}&units=metric&lang=es`)
+    .then(res => res.json())
+    .then(data => {
+      document.querySelector('#climaCiudad h3').innerText = data.name;
+      document.querySelector('#climaCiudad p:nth-of-type(1) strong').innerText = Math.round(data.main.temp) + '°C';
+      document.querySelector('#climaCiudad p:nth-of-type(2) strong').innerText = data.weather[0].description;
+      document.querySelector('#iconoClima').src = `https://openweathermap.org/img/wn/${data.weather[0].icon}.png`;
+    })
+    .catch(err => console.error("Error al obtener datos:", err));
+}
+
+// === SELECCIÓN DE CIUDAD ===
+document.getElementById('ciudadSelect').addEventListener('change', e=>{
+  actualizarClima(e.target.value);
+});
+
+// === CARGA INICIAL ===
+actualizarClima(document.getElementById('ciudadSelect').value);
+</script>
+
+</body>
+</html>
